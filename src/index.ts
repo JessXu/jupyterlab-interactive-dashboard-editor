@@ -16,10 +16,11 @@ import {
 import {
   Panel,
   Widget,
-  BoxPanel,
+  BoxPanel
+  // LayoutItem
 } from '@lumino/widgets';
 
-import { CodeCell } from '@jupyterlab/cells';
+import { CodeCell, CellDragUtils} from '@jupyterlab/cells';
 
 import { LabIcon } from '@jupyterlab/ui-components';
 
@@ -29,7 +30,9 @@ import { Message } from '@lumino/messaging';
 
 import { MimeData } from '@lumino/coreutils';
 
-import { IDragEvent } from '@lumino/dragdrop';
+import { IDragEvent
+        //  Drag
+} from '@lumino/dragdrop';
 
 import whiteDashboardSvgstr from '../style/icons/dashboard_icon_filled_white.svg';
 import greyDashboardSvgstr from '../style/icons/dashboard_icon_filled_grey.svg';
@@ -57,6 +60,8 @@ const DASHBOARD_CLASS = 'pr-JupyterDashboard';
 const DASHBOARD_WIDGET_CLASS = 'pr-DashboardWidget';
 
 const DROP_TARGET_CLASS = 'pr-DropTarget';
+
+// const OUTPUT_CELL_CLASS = 'pr-OutputCell';
 
 /**
  * Command IDs used
@@ -122,6 +127,11 @@ namespace DashboardWidget {
      * of the cell for when the notebook is loaded.
      */
     index?: number;
+
+
+    // dragData: ;
+
+    // focusedCell: 
   }
 }
 
@@ -129,6 +139,23 @@ namespace DashboardWidget {
  * A namespace for private functionality.
  */
 namespace Private {
+  // export function findCellOuput(mime: MimeData): string | undefined{
+  //   let target = event.target as HTMLElement;
+  //   const cellFilter = (node: HTMLElement) =>
+  //     node.classList.contains(CONSOLE_CELL_CLASS);
+  //   let cellIndex = CellDragUtils.findCell(target, this._cells, cellFilter);
+
+
+  //   // Create a DashboardWidget around the selected cell.
+  //   const content = new DashboardWidget({
+  //     notebook: current,
+  //     cell,
+  //     index
+  //   });
+  //   return 
+  // }
+  
+
   /**
    * Given a MimeData instance, extract the first text data, if any.
    */
@@ -138,6 +165,7 @@ namespace Private {
     if (textType === undefined) {
       return "undefined" as string;
     }
+    
     return mime.getData(textType) as string;
   }
 }
@@ -229,10 +257,11 @@ class DashboardWidget extends Panel {
     super.onAfterAttach(msg);
     this.node.addEventListener('click', this);
     this.node.addEventListener('contextmenu', this);
-    this.node.addEventListener('p-dragenter', this);
-    this.node.addEventListener('p-dragleave', this);
-    this.node.addEventListener('p-dragover', this);
-    this.node.addEventListener('p-drop', this);
+    this.node.addEventListener('lm-dragenter', this);
+    this.node.addEventListener('lm-dragleave', this);
+    this.node.addEventListener('lm-dragover', this);
+    this.node.addEventListener('lm-drop', this);
+    this.node.addEventListener('mousedown', this);
   }
 
   /**
@@ -242,14 +271,14 @@ class DashboardWidget extends Panel {
     super.onBeforeDetach(msg);
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('contextmenu', this);
-    this.node.addEventListener('p-dragenter', this);
-    this.node.addEventListener('p-dragleave', this);
-    this.node.addEventListener('p-dragover', this);
-    this.node.addEventListener('p-drop', this);
+    this.node.addEventListener('lm-dragenter', this);
+    this.node.addEventListener('lm-dragleave', this);
+    this.node.addEventListener('lm-dragover', this);
+    this.node.addEventListener('lm-drop', this);
   }
 
     /**
-   * Handle the `'p-dragenter'` event for the widget.
+   * Handle the `'lm-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
     const data = Private.findTextData(event.mimeData);
@@ -262,7 +291,7 @@ class DashboardWidget extends Panel {
   }
 
   /**
-   * Handle the `'p-dragleave'` event for the widget.
+   * Handle the `'lm-dragleave'` event for the widget.
    */
   private _evtDragLeave(event: IDragEvent): void {
     this.removeClass(DROP_TARGET_CLASS);
@@ -275,7 +304,7 @@ class DashboardWidget extends Panel {
   }
 
   /**
-   * Handle the `'p-dragover'` event for the widget.
+   * Handle the `'lm-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
     this.removeClass(DROP_TARGET_CLASS);
@@ -290,7 +319,7 @@ class DashboardWidget extends Panel {
   }
 
   /**
-   * Handle the `'p-drop'` event for the widget.
+   * Handle the `'lm-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
     const data = Private.findTextData(event.mimeData);
@@ -319,6 +348,96 @@ class DashboardWidget extends Panel {
     // this.model.value.insert(offset, data);
   }
 
+
+// function addCommands(
+//   app: JupyterFrontEnd,
+//   tracker: INotebookTracker,
+//   dashboardTracker: WidgetTracker<Dashboard>,
+//   outputTracker: WidgetTracker<DashboardWidget>
+// ): void {
+//   const { commands, shell } = app;
+
+//   /**
+//    * Get the current widget and activate unless the args specify otherwise.
+//    * jupyterlab/packages/notebook-extension/src/index.ts
+//    */
+//   function getCurrent(args: ReadonlyPartialJSONObject): NotebookPanel | null {
+//     const widget = tracker.currentWidget;
+//     const activate = args['activate'] !== false;
+
+//     if (activate && widget) {
+//       shell.activateById(widget.id);
+//     }
+
+//     return widget;
+//   }
+
+
+    /**
+   * Handle `mousedown` events for the widget.
+   */
+  private _evtMouseDown(event: MouseEvent): void {
+    const { button, shiftKey } = event;
+
+    // We only handle main or secondary button actions.
+    if (
+      !(button === 0 || button === 2) ||
+      // Shift right-click gives the browser default behavior.
+      (shiftKey && button === 2)
+    ) {
+      return;
+    }
+
+    // let target = event.target as HTMLElement;
+    // // const cellFilter = (node: HTMLElement) =>
+    // //   node.classList.contains(OUTPUT_CELL_CLASS);
+    // let cellIndex = this.index;
+    // // CellDragUtils.findCell(target, this._cell, cellFilter);
+
+    // if (cellIndex === -1) {
+    //   // `event.target` sometimes gives an orphaned node in
+    //   // Firefox 57, which can have `null` anywhere in its parent line. If we fail
+    //   // to find a cell using `event.target`, try again using a target
+    //   // reconstructed from the position of the click event.
+    //   target = document.elementFromPoint(
+    //     event.clientX,
+    //     event.clientY
+    //   ) as HTMLElement;
+    //   cellIndex = this.index;
+    //   // CellDragUtils.findCell(target, this._cells, cellFilter);
+    // }
+
+    if (this.index === -1) {
+      return;
+    }
+
+    const cell = this._cell;
+    // this._cells.get(cellIndex);
+
+    const targetArea: CellDragUtils.ICellTargetArea = CellDragUtils.detectTargetArea(
+      cell,
+      event.target as HTMLElement
+    );
+
+    console.log
+
+    if (targetArea === 'unknown') {
+      // this._dragData = {
+      //   pressX: event.clientX,
+      //   pressY: event.clientY,
+      //   index: cellIndex
+      // };
+
+      // this._focusedCell = cell;
+      // this.node.focus();
+
+      document.addEventListener('mouseup', this, true);
+      document.addEventListener('mousemove', this, true);
+      event.preventDefault();
+    }
+  }
+
+  
   handleEvent(event: Event): void {
     switch(event.type) {
       case 'click':
@@ -328,18 +447,27 @@ class DashboardWidget extends Panel {
         Array.from(document.getElementsByClassName(DASHBOARD_WIDGET_CLASS))
              .map(blur);
         this.node.focus();
-      case 'p-dragenter':
+      case 'lm-dragenter':
         this._evtDragEnter(event as IDragEvent);
         break;
-      case 'p-dragleave':
+      case 'lm-dragleave':
         this._evtDragLeave(event as IDragEvent);
         break;
-      case 'p-dragover':
+      case 'lm-dragover':
         this._evtDragOver(event as IDragEvent);
         break;
-      case 'p-drop':
+      case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
+      case 'mousedown':
+        this._evtMouseDown(event as MouseEvent);
+        break;
+      // case 'mousemove':
+      //   this._evtMouseMove(event as MouseEvent);
+      //   break;
+      // case 'mouseup':
+      //   this._evtMouseUp(event as MouseEvent);
+      //   break;
     }
   }
 
