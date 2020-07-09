@@ -6,7 +6,11 @@ import {
 import {
   INotebookTracker,
   NotebookPanel,
+  // NotebookActions,
+  INotebookModel
 } from '@jupyterlab/notebook';
+
+// import { refreshIcon } from '@jupyterlab/ui-components';
 
 import {
   ReadonlyPartialJSONObject,
@@ -19,6 +23,18 @@ import {
   BoxPanel,
   BoxLayout
 } from '@lumino/widgets';
+
+import {
+  IDisposable, DisposableDelegate
+} from '@lumino/disposable';
+
+import {
+  ToolbarButton
+} from '@jupyterlab/apputils';
+
+import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
 
 import { CodeCell } from '@jupyterlab/cells';
 
@@ -466,6 +482,7 @@ class DashboardWidget extends Panel {
     super.onAfterAttach(msg);
     this.node.addEventListener('click', this);
     this.node.addEventListener('contextmenu', this);
+    this.node.addEventListener('mousedown', this);
   }
 
   /**
@@ -477,6 +494,31 @@ class DashboardWidget extends Panel {
     this.node.removeEventListener('contextmenu', this);
   }
 
+  /**
+   * Handle `mousedown` events for the widget.
+   */
+  private _evtMouseDown(event: MouseEvent): void {
+    // let target = event.target as HTMLElement;
+    console.log("mouseDown", event);
+  }
+
+  /**
+   * Handle `mousemove` event of widget
+   */
+  private _evtMouseMove(event: MouseEvent) {
+    console.log("mouseMove", event);
+  }
+
+  /**
+   * Handle `mousemove` event of widget
+   */
+  private _evtMouseUp(event: MouseEvent) {
+    console.log("mouseUp", event);
+  }
+
+
+  
+
   handleEvent(event: Event): void {
     switch(event.type) {
       case 'click':
@@ -486,6 +528,15 @@ class DashboardWidget extends Panel {
         Array.from(document.getElementsByClassName(DASHBOARD_WIDGET_CLASS))
              .map(blur);
         this.node.focus();
+      case 'mousedown':
+        this._evtMouseDown(event as MouseEvent);
+        break;
+      case 'mousemove':
+        this._evtMouseMove(event as MouseEvent);
+        break;
+      case 'mouseup':
+        this._evtMouseUp(event as MouseEvent);
+        break;
     }
   }
 
@@ -656,6 +707,8 @@ const extension: JupyterFrontEndPlugin<void> = {
       keys: ['Backspace'],
       selector: '.pr-DashboardWidget'
     });
+
+    app.docRegistry.addWidgetExtension('Notebook', new DashboardButton(app, outputTracker, dashboardTracker, tracker));
 
     // Server component currently unimplemented. Unneeded?
     //
@@ -1076,6 +1129,54 @@ namespace DashboardInsert {
     index?: number;
 
     createNew?: boolean;
+  }
+}
+
+/**
+ * Adds a button to the toolbar.
+ */
+export
+class DashboardButton implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+  _app: JupyterFrontEnd;
+  _dashboard: Dashboard;
+  // _outputTracker: WidgetTracker<DashboardWidget>;
+  _dashboardTracker: WidgetTracker<Dashboard>;
+  _tracker: INotebookTracker;
+  constructor(app: JupyterFrontEnd, outputTracker: WidgetTracker<DashboardWidget>, dashboardTracker: WidgetTracker<Dashboard>, tracker: INotebookTracker) {
+    this._app = app;
+    this._dashboard= new Dashboard({outputTracker});
+    // this._outputTracker = outputTracker;
+    this._dashboardTracker = dashboardTracker;
+    this._tracker = tracker;
+  }
+
+  createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
+    let callback = () => {
+      const currentNotebook = this._tracker.currentWidget;
+      if (currentNotebook) {
+        this._app.shell.activateById(currentNotebook.id);
+      }
+
+      currentNotebook.context.addSibling(this._dashboard, {
+        ref: currentNotebook.id,
+        mode: 'split-bottom'
+      });
+
+      // Add the new dashboard to the tracker.
+      void this._dashboardTracker.add(this._dashboard);
+    };
+    let button = new ToolbarButton({
+      className: 'dashboardButton',
+      icon: Icons.greyDashboard,
+      iconClass: 'dashboard',
+      onClick: callback,
+      tooltip: 'Create Dashboard'
+    });
+
+    panel.toolbar.insertItem(9, 'dashboard', button);
+    return new DisposableDelegate(() => {
+      button.dispose();
+    });
   }
 }
 
