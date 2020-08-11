@@ -63,7 +63,8 @@ export class DashboardWidget extends Panel {
         }
         if (this._cell.model.type === 'markdown') {
           const markdown = this._cell as MarkdownCell;
-          clone = markdown.clone().editorWidget.parent;
+          clone = markdown.clone().editorWidget.parent as Widget;
+          // console.log(clone.show());
         } else {
           clone = (this._cell as CodeCell).cloneOutputArea() as Widget;
         }

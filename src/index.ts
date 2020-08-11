@@ -344,7 +344,7 @@ function addCommands(
       const currentNotebook = tracker.currentWidget;
       currentNotebook.context.addSibling(dashboard, {
         ref: currentNotebook.id,
-        mode: 'split-right',
+        mode: 'split-left',
       });
       dashboardTracker.add(dashboard);
     },
