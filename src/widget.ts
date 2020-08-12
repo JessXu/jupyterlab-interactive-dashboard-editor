@@ -20,6 +20,8 @@ import { getNotebookId, getCellId } from './utils';
 
 import { Signal, ISignal } from '@lumino/signaling';
 
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+
 import { Icons } from './icons';
 
 import { Widgetstore } from './widgetstore';
@@ -64,6 +66,8 @@ export class DashboardWidget extends Panel {
         if (this._cell.model.type === 'markdown') {
           const markdown = this._cell as MarkdownCell;
           clone = markdown.clone().editorWidget.parent as Widget;
+          var editor = markdown.editor as CodeMirrorEditor;
+          console.log(editor);
           // console.log(clone.show());
         } else {
           clone = (this._cell as CodeCell).cloneOutputArea() as Widget;
