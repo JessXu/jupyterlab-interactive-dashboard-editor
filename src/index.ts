@@ -42,6 +42,7 @@ import { CommandIDs } from './commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 const DEFAULT_NAME = 'untitled.dash';
+const MULTI_SELECTED_CLASS = 'pr-MultiSelected';
 
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-interactive-dashboard-editor',
@@ -225,6 +226,20 @@ const extension: JupyterFrontEndPlugin<void> = {
       selector: '.pr-EditableWidget',
     });
 
+    app.commands.addKeyBinding({
+      command: CommandIDs.select,
+      args: {},
+      keys: ['Cmd E'],
+      selector: '.pr-EditableWidget',
+    });
+
+    app.commands.addKeyBinding({
+      command: CommandIDs.deselect,
+      args: {},
+      keys: ['Cmd E'],
+      selector: '.pr-JupyterDashboard',
+    });
+
     // Add commands to edit menu.
     mainMenu.editMenu.addGroup([
       {
@@ -387,8 +402,17 @@ function addCommands(
     execute: (args) => {
       const clipboard = utils.clipboard;
       const info = outputTracker.currentWidget.info;
+      const selected = utils.selected;
       clipboard.clear();
-      clipboard.add(info);
+      if(selected.size === 0){
+        console.log("no multi selection!");
+        clipboard.add(info);
+      }else{
+        selected.forEach(widgetInfo => {
+          clipboard.add(widgetInfo);
+        });
+      }
+      console.log("copying", clipboard);
     },
     isEnabled: (args) => inToolbar(args) || hasOutput(),
   });
@@ -447,6 +471,35 @@ function addCommands(
     },
     isEnabled: (args) => inToolbar(args) || hasDashboard(),
   });
+
+  commands.addCommand(CommandIDs.select, {
+    label: (args) => (inToolbar(args) ? '' : 'Select'),
+    execute: (args) => {
+      const selected = utils.selected;
+      const widget = outputTracker.currentWidget;
+      const info = outputTracker.currentWidget.info;
+      widget.addClass(MULTI_SELECTED_CLASS);
+      selected.add(info);
+      console.log("widget", widget);
+      console.log("selected", selected);
+    },
+    isEnabled: (args) => inToolbar(args) || hasOutput(),
+  });
+
+  commands.addCommand(CommandIDs.deselect, {
+    label: (args) => (inToolbar(args) ? '' : 'Deselect'),
+    execute: (args) => {
+      const selected = utils.selected;
+      console.log("deselecting!");
+      selected.forEach(info => {
+        console.log(info.widgetId);
+      });
+      // widget.addClass(MULTI_SELECTED_CLASS);
+      selected.clear();
+    },
+    isEnabled: (args) => inToolbar(args) || hasOutput(),
+  });
+
 }
 
 namespace Private {

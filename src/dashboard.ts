@@ -1,4 +1,4 @@
-import { NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookPanel} from '@jupyterlab/notebook';
 
 import { CodeCell, MarkdownCell, Cell } from '@jupyterlab/cells';
 
@@ -76,6 +76,7 @@ export class Dashboard extends Widget {
     this.node.addEventListener('lm-dragleave', this);
     this.node.addEventListener('lm-dragover', this);
     this.node.addEventListener('lm-drop', this);
+    // this.node.addEventListener('click', this);
   }
 
   /**
@@ -87,6 +88,7 @@ export class Dashboard extends Widget {
     this.node.removeEventListener('lm-dragleave', this);
     this.node.removeEventListener('lm-dragover', this);
     this.node.removeEventListener('lm-drop', this);
+    // this.node.removeEventListener('click', this);
   }
 
   /**
@@ -115,6 +117,17 @@ export class Dashboard extends Widget {
     event.preventDefault();
     event.stopPropagation();
   }
+
+  /**
+   * Handle the `'click'` event for the widget.
+  //  */
+  // private _evtClick(event: IDragEvent): void {
+  //   console.log("clicked dashboard!");
+    
+
+  //   event.preventDefault();
+  //   event.stopPropagation();
+  // }
 
   /**
    * Handle the `'lm-drop'` event for the widget.
@@ -196,6 +209,8 @@ export class Dashboard extends Widget {
       case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
+      // case 'click':
+      //   this._evtClick(event as IDragEvent);
     }
   }
 

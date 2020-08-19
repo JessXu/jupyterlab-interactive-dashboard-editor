@@ -263,11 +263,14 @@ export class DashboardWidget extends Panel {
       return;
     }
 
-    // Multi select
-    if (shiftKey){
-      console.log("Multi select", this);
-      // this.addClass("jp-mod-multSelected");
-    }
+    // // Multi select
+    // if (shiftKey){
+    //   // (this.parent as Dashboard);
+    //   this.addClass(MULTI_SELECTED_CLASS);
+    //   // CommandIDs.select.
+      
+    //   console.log("Multi select", this);
+    // }
 
     event.preventDefault();
 

@@ -11,6 +11,8 @@ export namespace CommandIDs {
   export const cut = 'dashboard:cut';
   export const copy = 'dashboard:copy';
   export const paste = 'dashboard:paste';
+  export const select = 'dashboard:select';
+  export const deselect = 'dashboard:deselect';
   export const runOutput = 'dashboard:run-output';
   export const runAllAboveOutput = 'dashboard:run-all-above-output';
   export const startFullscreen = 'dashboard:start-fullscreen';
