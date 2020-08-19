@@ -19,6 +19,10 @@
     border: var(--jp-border-width) solid var(--jp-brand-color1);
 }
 
+.pr-EditableWidget.pr-DashboardWidget.pr-MultiSelected{
+    border: var(--jp-border-width) solid var(--jp-brand-color1);
+}
+
 .pr-DashboardArea {
     overflow: auto;
 }
