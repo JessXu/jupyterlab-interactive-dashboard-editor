@@ -263,6 +263,12 @@ export class DashboardWidget extends Panel {
       return;
     }
 
+    // Multi select
+    if (shiftKey){
+      console.log("Multi select", this);
+      // this.addClass("jp-mod-multSelected");
+    }
+
     event.preventDefault();
 
     window.addEventListener('mouseup', this);

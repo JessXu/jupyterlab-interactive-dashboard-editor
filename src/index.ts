@@ -30,7 +30,6 @@ import { DashboardModelFactory } from './model';
 
 import {
   undoIcon,
-  redoIcon,
   copyIcon,
   cutIcon,
   pasteIcon,
@@ -67,7 +66,7 @@ const extension: JupyterFrontEndPlugin<void> = {
       namespace: 'dashboard-outputs',
     });
 
-    //Singleton Utils: clipboard, fullscreen, content manager
+    //Singleton Utils: clipboard, fullscreen, content manager, selected
     const utils = new DBUtils();
 
     // Define dashboard file type.
@@ -300,7 +299,7 @@ function addCommands(
    */
   commands.addCommand(CommandIDs.redo, {
     label: (args) => (inToolbar(args) ? '' : 'Redo'),
-    icon: redoIcon,
+    icon: DashboardIcons.redo,
     execute: (args) => {
       dashboardTracker.currentWidget.redo();
     },
