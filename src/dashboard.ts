@@ -397,7 +397,7 @@ export class DashboardDocument extends DocumentWidget<Dashboard> {
       toggleMode,
     } = CommandIDs;
 
-    const args = { toolbar: true };
+    const args = { toolbar: true, dashboardId: content.id};
 
     this.toolbar.addItem(
       'save',
