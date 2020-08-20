@@ -437,7 +437,13 @@ function addCommands(
     icon: pasteIcon,
     execute: (args) => {
       const clipboard = utils.clipboard;
-      const dashboard = dashboardTracker.currentWidget;
+      const id = args.dashboardId;
+      let dashboard: Dashboard;
+      if(id){
+        dashboard = dashboardTracker.find((widget) => widget.id === id);
+      }else{
+        dashboard = dashboardTracker.currentWidget;
+      }
       const widgetstore = dashboard.model.widgetstore;
       clipboard.forEach((info) => {
         const widgetId = DashboardWidget.createDashboardWidgetId();
