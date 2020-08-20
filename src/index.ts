@@ -40,6 +40,7 @@ import {
 import { CommandIDs } from './commands';
 
 import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { DashboardLayout } from './custom_layout';
 
 const DEFAULT_NAME = 'untitled.dash';
 const MULTI_SELECTED_CLASS = 'pr-MultiSelected';
@@ -405,14 +406,12 @@ function addCommands(
       const selected = utils.selected;
       clipboard.clear();
       if(selected.size === 0){
-        console.log("no multi selection!");
         clipboard.add(info);
       }else{
         selected.forEach(widgetInfo => {
           clipboard.add(widgetInfo);
         });
       }
-      console.log("copying", clipboard);
     },
     isEnabled: (args) => inToolbar(args) || hasOutput(),
   });
@@ -424,10 +423,28 @@ function addCommands(
       const clipboard = utils.clipboard;
       const widget = outputTracker.currentWidget;
       const info = widget.info;
+      const selected = utils.selected;
       const dashboard = dashboardTracker.currentWidget;
       clipboard.clear();
-      clipboard.add(info);
-      dashboard.deleteWidget(widget);
+      if(selected.size === 0){
+        clipboard.add(info);
+        dashboard.deleteWidget(widget);
+      }else{
+        const widgets = new Set<DashboardWidget>();
+        var w = (dashboard.layout as DashboardLayout).iter().next();
+        while(w != undefined){
+          widgets.add(w as DashboardWidget);
+          w = (dashboard.layout as DashboardLayout).iter().next();
+        }
+        selected.forEach(widgetInfo => {
+          clipboard.add(widgetInfo);
+          widgets.forEach(wdgt => {
+            if(wdgt.info.widgetId === widgetInfo.widgetId){
+              dashboard.deleteWidget(wdgt);
+            }
+          })
+        });
+      }
     },
     isEnabled: (args) => inToolbar(args) || hasOutput(),
   });
